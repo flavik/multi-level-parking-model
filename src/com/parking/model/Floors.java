@@ -22,25 +22,27 @@ import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import android.opengl.GLES20;
-
 /**
  * A vertex shaded cube.
  */
-class Cube
+class Floors
 {
-    public Cube()
+	private int num = 0;
+    public Floors(int numFloors)
     {
+    	num = numFloors;
         int one = 0x10000;
+        int h = one/16;
+        
         int vertices[] = {
-                -one, -one, -one,
-                one, -one, -one,
-                one,  one, -one,
-                -one,  one, -one,
-                -one, -one,  one,
-                one, -one,  one,
-                one,  one,  one,
-                -one,  one,  one,
+                -one, -h, -one,
+                one, -h, -one,
+                one,  h, -one,
+                -one,  h, -one,
+                -one, -h,  one,
+                one, -h,  one,
+                one,  h,  one,
+                -one,  h,  one,
         };
 
         int colors[] = {
@@ -90,15 +92,15 @@ class Cube
 
     public void draw(GL10 gl)
     {
-    	
-        gl.glFrontFace(gl.GL_CW);
-        gl.glVertexPointer(3, gl.GL_FIXED, 0, mVertexBuffer);
-        gl.glColorPointer(4, gl.GL_FIXED, 0, mColorBuffer);
-        gl.glDrawElements(gl.GL_TRIANGLES, 36, gl.GL_UNSIGNED_BYTE, mIndexBuffer);
-        /*
-        GLES20.glFrontFace(GLES20.GL_CW);
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 36, GLES20.GL_UNSIGNED_BYTE, mIndexBuffer);
-        */
+        gl.glFrontFace(GL10.GL_CW);
+        gl.glVertexPointer(3,GL10.GL_FIXED, 0, mVertexBuffer);
+        gl.glColorPointer(4, GL10.GL_FIXED, 0, mColorBuffer);
+        gl.glTranslatef(0, (float)-0.5, 0);
+        
+        for (int i=0; i<num; i++) {
+        	gl.glTranslatef(0, (float)1.0/num, 0);
+            gl.glDrawElements(GL10.GL_TRIANGLES, 36, GL10.GL_UNSIGNED_BYTE, mIndexBuffer); 
+        }
     }
 
     private IntBuffer   mVertexBuffer;
