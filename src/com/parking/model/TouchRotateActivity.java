@@ -21,6 +21,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -34,13 +35,17 @@ import android.view.ScaleGestureDetector;
  * + How to redraw in response to user input.
  */
 public class TouchRotateActivity extends Activity {
+    private GLSurfaceView mGLSurfaceView;
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Create our Preview view and set it as the content of our
         // Activity
-        mGLSurfaceView = new TouchSurfaceView(this);
+        Intent intent = getIntent();
+        mGLSurfaceView = new TouchSurfaceView(this, 
+        		intent.getIntExtra("floors", 1), intent.getIntExtra("cars", 1));
         setContentView(mGLSurfaceView);
         mGLSurfaceView.requestFocus();
         mGLSurfaceView.setFocusableInTouchMode(true);
@@ -61,8 +66,6 @@ public class TouchRotateActivity extends Activity {
         super.onPause();
         mGLSurfaceView.onPause();
     }
-
-    private GLSurfaceView mGLSurfaceView;
 }
 
 /**
@@ -71,6 +74,9 @@ public class TouchRotateActivity extends Activity {
  */
 class TouchSurfaceView extends GLSurfaceView {
 	private ScaleGestureDetector mScaleDetector;
+	
+    public int mFloorsCount = 1;
+    public int mCarsCount = 1;
 	
     private final float TOUCH_SCALE_FACTOR = 180.0f / (320);
     private final float TRACKBALL_SCALE_FACTOR = 36.0f;
@@ -83,8 +89,12 @@ class TouchSurfaceView extends GLSurfaceView {
 	// The ‘active pointer’ is the one currently moving our object.
 	private int mActivePointerId = INVALID_POINTER_ID;
 
-    public TouchSurfaceView(Context context) {
+    public TouchSurfaceView(Context context, int floors, int cars) {
         super(context);
+        
+        mFloorsCount = floors;
+        mCarsCount = cars;
+        
         mRenderer = new CubeRenderer();
         setRenderer(mRenderer);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
@@ -183,13 +193,14 @@ class TouchSurfaceView extends GLSurfaceView {
      * Render a cube.
      */
     private class CubeRenderer implements GLSurfaceView.Renderer {
-        private Floors mFloor;
+        private Scene mScene;
         public float mAngleX;
-        public float mAngleY;
+        public float mAngleY; 
+        
         public float mScaleFactor = 1.f;
-    	
+        
         public CubeRenderer() {
-            mFloor = new Floors(3);
+            mScene = new Scene(mFloorsCount, mCarsCount);
         }
 
         public void onDrawFrame(GL10 gl) {
@@ -208,14 +219,16 @@ class TouchSurfaceView extends GLSurfaceView {
             gl.glMatrixMode(GL10.GL_MODELVIEW);
             gl.glLoadIdentity();
             gl.glTranslatef(0, 0, -3.0f);
-            gl.glRotatef(mAngleX, 0, 1, 0);
+            
             gl.glRotatef(mAngleY, 1, 0, 0);
+            gl.glRotatef(mAngleX, 0, 1, 0);
+            
             gl.glScalef(mScaleFactor, mScaleFactor, mScaleFactor);
             
             gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
             gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
 
-            mFloor.draw(gl);
+            mScene.draw(gl);
         }
 
         public void onSurfaceChanged(GL10 gl, int width, int height) {

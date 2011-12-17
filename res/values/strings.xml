@@ -2,4 +2,7 @@
 <resources>
     <string name="app_name">ParkingModel</string>
     <string name="loading">Загрузка...</string>
+    <string name="floorsCnt">Количество этажей: </string>
+    <string name="carsCnt">Количество автомобилей на этаже: </string>
+    <string name="modeling">Моделировать</string>
 </resources>
