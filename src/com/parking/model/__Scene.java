@@ -18,18 +18,18 @@ package com.parking.model;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import android.util.Log;
-
 /**
  * A vertex shaded cube.
  */
-class Scene
+class __Scene
 {
-    private IntBuffer   mVertexBuffer;
+	private IntBuffer   mVertexBuffer;
+
     private IntBuffer   mColorBuffer;
     private ByteBuffer  mIndexBuffer;
 
@@ -54,7 +54,16 @@ class Scene
 	private int floorWidth = 65536/2;
 	private int floorLength = 65536;
 	
-    public Scene(int floorsCount, int carsCount)
+	
+	private IntBuffer _scratchIntBuffer;
+	private FloatBuffer _scratchFloatBuffer;
+	private boolean _scratchB;
+	
+//	public TextureManager _textureManager;
+//	
+//	public Object3dContainer carModel = null;
+	
+    public __Scene(int floorsCount, int carsCount)
     {
     	floors = floorsCount;
     	cars = carsCount;
@@ -200,12 +209,276 @@ class Scene
         mIndexBufferAxes.put(indicesAxes);
         mIndexBufferAxes.position(0);
         
+        
+        
+//        // for automobile model
+//        
+//		_scratchIntBuffer = IntBuffer.allocate(4);
+//		_scratchFloatBuffer = FloatBuffer.allocate(4);
+//		
+//		_textureManager = Shared.textureManager();
+//		
+//		
+////		Log.i("parse", ""+Shared.context().getResources()
+////				.getIdentifier("raw/camaro_obj", null, null));
+//		IParser parser = Parser.createParser(Parser.Type.OBJ,
+//				Shared.context().getResources(), "com.parking.model:raw/camaro_obj", true);
+//		parser.parse();
+//    }
+//    
+//    private void loadCarModel() {
+//		IParser parser = Parser.createParser(Parser.Type.OBJ,
+//				Shared.context().getResources(), "com.parking.model:raw/camaro_obj", true);
+//		parser.parse();
+//		carModel = parser.getParsedObject();
+//		carModel.scale().x = carModel.scale().y = carModel.scale().z = .7f;
     }
+//    
+//	protected void drawObject(Object3d $o, GL10 _gl)
+//	{
+//		if ($o.isVisible() == false) return;		
+//
+//		// Various per-object settings:
+//		
+//		// Normals
+//
+//		if ($o.hasNormals() && $o.normalsEnabled()) {
+//			$o.vertices().normals().buffer().position(0);
+//			_gl.glNormalPointer(GL10.GL_FLOAT, 0, $o.vertices().normals().buffer());
+//			_gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
+//		}
+//		else {
+//			_gl.glDisableClientState(GL10.GL_NORMAL_ARRAY);
+//		}
+//		
+//		// Is lighting enabled for object...
+//		
+//		/*
+//		// *** this version not working properly on emulator - why not? ***
+//		_scratchIntBuffer.position(0);
+//		_gl.glGetIntegerv(GL10.GL_LIGHTING, _scratchIntBuffer);
+//		if (useLighting != _scratchIntBuffer.get(0))
+//		{
+//			if (useLighting == 1) {
+//				_gl.glEnable(GL10.GL_LIGHTING);
+//			} else {
+//				_gl.glDisable(GL10.GL_LIGHTING);
+//			}
+//		}
+//		*/
+//		
+//		// Enable lighting
+//		/*
+//		boolean useLighting = ($o.hasNormals() && $o.normalsEnabled() && $o.lightingEnabled());
+//		if (useLighting) {
+//			_gl.glEnable(GL10.GL_LIGHTING);
+//		} else {
+//			_gl.glDisable(GL10.GL_LIGHTING);
+//		}
+//		*/
+//		// Shademodel
+//		
+//		_gl.glGetIntegerv(GL11.GL_SHADE_MODEL, _scratchIntBuffer);
+//		if ($o.shadeModel().glConstant() != _scratchIntBuffer.get(0)) {
+//			_gl.glShadeModel($o.shadeModel().glConstant());
+//		}
+//		
+//		// Colors: either per-vertex, or per-object
+//
+//		if ($o.hasVertexColors() && $o.vertexColorsEnabled()) {
+//			$o.vertices().colors().buffer().position(0);
+//			_gl.glColorPointer(4, GL10.GL_UNSIGNED_BYTE, 0, $o.vertices().colors().buffer());
+//			_gl.glEnableClientState(GL10.GL_COLOR_ARRAY); 
+//		}
+//		else {
+//			_gl.glColor4f(
+//				(float)$o.defaultColor().r / 255f, 
+//				(float)$o.defaultColor().g / 255f, 
+//				(float)$o.defaultColor().b / 255f, 
+//				(float)$o.defaultColor().a / 255f
+//			);
+//			_gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
+//		}
+//		
+//		// Colormaterial
+//		
+//		_gl.glGetIntegerv(GL10.GL_COLOR_MATERIAL, _scratchIntBuffer);
+//		_scratchB = (_scratchIntBuffer.get(0) != 0);
+//		if ($o.colorMaterialEnabled() != _scratchB) {
+//			if ($o.colorMaterialEnabled())
+//				_gl.glEnable(GL10.GL_COLOR_MATERIAL);
+//			else
+//				_gl.glDisable(GL10.GL_COLOR_MATERIAL);
+//		}
+//		
+//		// Point size
+//		
+//		if ($o.renderType() == RenderType.POINTS) 
+//		{
+//			if ($o.pointSmoothing()) 
+//				_gl.glEnable(GL10.GL_POINT_SMOOTH);
+//			else
+//				_gl.glDisable(GL10.GL_POINT_SMOOTH);
+//			
+//			_gl.glPointSize($o.pointSize());
+//		}
+//
+//		// Line properties
+//		
+//		if ($o.renderType() == RenderType.LINES || $o.renderType() == RenderType.LINE_STRIP || $o.renderType() == RenderType.LINE_LOOP) 
+//		{
+//			if ( $o.lineSmoothing() == true) {
+//				_gl.glEnable(GL10.GL_LINE_SMOOTH);
+//			}
+//			else {
+//				_gl.glDisable(GL10.GL_LINE_SMOOTH);
+//			}
+//
+//			_gl.glLineWidth($o.lineWidth());
+//		}
+//
+//		// Backface culling 
+//		
+//		if ($o.doubleSidedEnabled()) {
+//		    _gl.glDisable(GL10.GL_CULL_FACE);
+//		} 
+//		else {
+//		    _gl.glEnable(GL10.GL_CULL_FACE);
+//		}
+//		
+//
+//		drawObject_textures($o, _gl);
+//
+//		
+//		// Matrix operations in modelview
+//
+//		_gl.glPushMatrix();
+//		
+//		_gl.glTranslatef($o.position().x, $o.position().y, $o.position().z);
+//		
+//		_gl.glRotatef($o.rotation().x, 1,0,0);
+//		_gl.glRotatef($o.rotation().y, 0,1,0);
+//		_gl.glRotatef($o.rotation().z, 0,0,1);
+//		
+//		_gl.glScalef($o.scale().x, $o.scale().y, $o.scale().z);
+//		
+//		// Draw
+//
+//		$o.vertices().points().buffer().position(0);
+//		_gl.glVertexPointer(3, GL10.GL_FLOAT, 0, $o.vertices().points().buffer());
+//
+//		if (! $o.ignoreFaces())
+//		{
+//			int pos, len;
+//			
+//			if (! $o.faces().renderSubsetEnabled()) {
+//				pos = 0;
+//				len = $o.faces().size();
+//			}
+//			else {
+//				pos = $o.faces().renderSubsetStartIndex() * FacesBufferedList.PROPERTIES_PER_ELEMENT;
+//				len = $o.faces().renderSubsetLength();
+//			}
+//
+//			$o.faces().buffer().position(pos);
+//
+//			_gl.glDrawElements(
+//					$o.renderType().glValue(),
+//					len * FacesBufferedList.PROPERTIES_PER_ELEMENT, 
+//					GL10.GL_UNSIGNED_SHORT, 
+//					$o.faces().buffer());
+//		}
+//		else
+//		{
+//			_gl.glDrawArrays($o.renderType().glValue(), 0, $o.vertices().size());
+//		}
+//		
+//		//
+//		// Recurse on children
+//		//
+//		
+//		if ($o instanceof Object3dContainer)
+//		{
+//			Object3dContainer container = (Object3dContainer)$o;
+//			
+//			for (int i = 0; i < container.children().size(); i++)
+//			{
+//				Object3d o = container.children().get(i);
+//				drawObject(o, _gl);
+//			}
+//		}
+//		
+//		// Restore matrix
+//		
+//		_gl.glPopMatrix();
+//	}
+//	
+//	private void drawObject_textures(Object3d $o, GL10 _gl)
+//	{
+//		// iterate thru object's textures
+//		
+//		for (int i = 0; i < RenderCaps.maxTextureUnits(); i++)
+//		{
+//			_gl.glActiveTexture(GL10.GL_TEXTURE0 + i);
+//			_gl.glClientActiveTexture(GL10.GL_TEXTURE0 + i); 
+//
+//			if ($o.hasUvs() && $o.texturesEnabled())
+//			{
+//				$o.vertices().uvs().buffer().position(0);
+//				_gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, $o.vertices().uvs().buffer());
+//
+//				TextureVo textureVo = ((i < $o.textures().size())) ? textureVo = $o.textures().get(i) : null;
+//
+//				if (textureVo != null)
+//				{
+//					// activate texture
+//					int glId = _textureManager.getGlTextureId(textureVo.textureId);
+//					_gl.glBindTexture(GL10.GL_TEXTURE_2D, glId);
+//				    _gl.glEnable(GL10.GL_TEXTURE_2D);
+//					_gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+//					
+//					int minFilterType = _textureManager.hasMipMap(textureVo.textureId) ? GL10.GL_LINEAR_MIPMAP_NEAREST : GL10.GL_NEAREST; 
+//					_gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, minFilterType);
+//					_gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR); // (OpenGL default)
+//					
+//					// do texture environment settings
+//					for (int j = 0; j < textureVo.textureEnvs.size(); j++)
+//					{
+//						_gl.glTexEnvx(GL10.GL_TEXTURE_ENV, textureVo.textureEnvs.get(j).pname, textureVo.textureEnvs.get(j).param);
+//					}
+//					
+//					// texture wrapping settings
+//					_gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, (textureVo.repeatU ? GL10.GL_REPEAT : GL10.GL_CLAMP_TO_EDGE));
+//					_gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, (textureVo.repeatV ? GL10.GL_REPEAT : GL10.GL_CLAMP_TO_EDGE));		
+//
+//					// texture offset, if any
+//					if (textureVo.offsetU != 0 || textureVo.offsetV != 0)
+//					{
+//						_gl.glMatrixMode(GL10.GL_TEXTURE);
+//						_gl.glLoadIdentity();
+//						_gl.glTranslatef(textureVo.offsetU, textureVo.offsetV, 0);
+//						_gl.glMatrixMode(GL10.GL_MODELVIEW); // .. restore matrixmode
+//					}
+//				}
+//				else
+//				{
+//					_gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
+//				    _gl.glDisable(GL10.GL_TEXTURE_2D);
+//					_gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+//				}
+//			}
+//			else
+//			{
+//				_gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
+//			    _gl.glDisable(GL10.GL_TEXTURE_2D);
+//				_gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+//			}
+//		}
+//	}
+	
 
     public void draw(GL10 gl)
-    {
-        gl.glFrontFace(GL10.GL_CW);
-        
+    {	        
         gl.glPushMatrix();
         gl.glTranslatef(0, -((floors+1)*betweenFloorsHeight)/2f, 0);
         
@@ -244,7 +517,11 @@ class Scene
         gl.glVertexPointer(3 ,GL10.GL_FIXED, 0, mVertexBufferAxeZ);
         gl.glColorPointer(4, GL10.GL_FIXED, 0, mColorBufferAxeZ);
         gl.glDrawElements(GL10.GL_LINE_STRIP, 2, GL10.GL_UNSIGNED_BYTE, mIndexBufferAxes);
-       
+        
+//        if (carModel == null) {
+//        	loadCarModel();
+//        }
+//        drawObject(carModel, gl);
     }
     
     public void draw_floors_lifting(GL10 gl, int side) {  // side = 1 - right, side = -1 - left

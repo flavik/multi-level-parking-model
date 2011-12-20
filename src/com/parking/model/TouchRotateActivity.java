@@ -16,16 +16,14 @@
 
 package com.parking.model;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
+import com.parking.model.min3d.core.Object3dContainer;
+import com.parking.model.min3d.core.RendererActivity;
+import com.parking.model.min3d.parser.IParser;
+import com.parking.model.min3d.parser.Parser;
+import com.parking.model.min3d.vos.Light;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.opengl.GLSurfaceView;
-import android.os.Bundle;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 
 /**
  * Wrapper activity demonstrating the use of {@link GLSurfaceView}, a view
@@ -34,236 +32,70 @@ import android.view.ScaleGestureDetector;
  * Shows:
  * + How to redraw in response to user input.
  */
-public class TouchRotateActivity extends Activity {
-    private GLSurfaceView mGLSurfaceView;
-	
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // Create our Preview view and set it as the content of our
-        // Activity
-        Intent intent = getIntent();
-        mGLSurfaceView = new TouchSurfaceView(this, 
-        		intent.getIntExtra("floors", 1), intent.getIntExtra("cars", 1));
-        setContentView(mGLSurfaceView);
-        mGLSurfaceView.requestFocus();
-        mGLSurfaceView.setFocusableInTouchMode(true);
-    }
-
-    @Override
-    protected void onResume() {
-        // Ideally a game should implement onResume() and onPause()
-        // to take appropriate action when the activity looses focus
-        super.onResume();
-        mGLSurfaceView.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        // Ideally a game should implement onResume() and onPause()
-        // to take appropriate action when the activity looses focus
-        super.onPause();
-        mGLSurfaceView.onPause();
-    }
-}
-
-/**
- * Implement a simple rotation control.
- *
- */
-class TouchSurfaceView extends GLSurfaceView {
-	private ScaleGestureDetector mScaleDetector;
-	
-    public int mFloorsCount = 1;
-    public int mCarsCount = 1;
-	
-    private final float TOUCH_SCALE_FACTOR = 180.0f / (320);
-    private final float TRACKBALL_SCALE_FACTOR = 36.0f;
-    private CubeRenderer mRenderer;
-    private float mPreviousX;
-    private float mPreviousY;
-	
-	private static final int INVALID_POINTER_ID = -1;
-
-	// The ‘active pointer’ is the one currently moving our object.
-	private int mActivePointerId = INVALID_POINTER_ID;
-
-    public TouchSurfaceView(Context context, int floors, int cars) {
-        super(context);
-        
-        mFloorsCount = floors;
-        mCarsCount = cars;
-        
-        mRenderer = new CubeRenderer();
-        setRenderer(mRenderer);
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        
-        // Create our ScaleGestureDetector
-        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
-    }
-
-    @Override 
-    public boolean onTrackballEvent(MotionEvent e) {
-        mRenderer.mAngleX += e.getX() * TRACKBALL_SCALE_FACTOR;
-        mRenderer.mAngleY += e.getY() * TRACKBALL_SCALE_FACTOR;
-        requestRender();
-        return true;
-    }
-
-    @Override 
-    public boolean onTouchEvent(MotionEvent ev) {
-        // Let the ScaleGestureDetector inspect all events.
-        mScaleDetector.onTouchEvent(ev);
-    	
-        final int action = ev.getAction();
-        switch (action & MotionEvent.ACTION_MASK) {
-	        case MotionEvent.ACTION_DOWN: {
-	            float x = ev.getX();
-	            float y = ev.getY();
-	            
-	            mPreviousX = x;
-	            mPreviousY = y;
-	
-	            // Save the ID of this pointer
-	            mActivePointerId = ev.getPointerId(0);
-	            break;
-	        }
-	        case MotionEvent.ACTION_MOVE: {
-	            final int pointerIndex = ev.findPointerIndex(mActivePointerId);
-	            final float x = ev.getX(pointerIndex);
-	            final float y = ev.getY(pointerIndex);
-	            
-	            if (!mScaleDetector.isInProgress()) {
-		            float dx = x - mPreviousX;
-		            float dy = y - mPreviousY;
-		            mRenderer.mAngleX += dx * TOUCH_SCALE_FACTOR;
-		            mRenderer.mAngleY += dy * TOUCH_SCALE_FACTOR;
-		            requestRender();
-	            }
-	            
-	            mPreviousX = x;
-	            mPreviousY = y;
-	            break;
-	        }
-	        
-	        case MotionEvent.ACTION_UP: {
-	            mActivePointerId = INVALID_POINTER_ID;
-	            break;
-	        }
-	            
-	        case MotionEvent.ACTION_CANCEL: {
-	            mActivePointerId = INVALID_POINTER_ID;
-	            break;
-	        }
-	        
-	        case MotionEvent.ACTION_POINTER_UP: {
-	            // Extract the index of the pointer that left the touch sensor
-	            final int pointerIndex = (action & MotionEvent.ACTION_POINTER_INDEX_MASK) 
-	                    >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-	            final int pointerId = ev.getPointerId(pointerIndex);
-	            if (pointerId == mActivePointerId) {
-	                // This was our active pointer going up. Choose a new
-	                // active pointer and adjust accordingly.
-	                final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-	                mPreviousX = ev.getX(newPointerIndex);
-	                mPreviousY = ev.getY(newPointerIndex);
-	                mActivePointerId = ev.getPointerId(newPointerIndex);
-	            }
-	            break;
-	        }
-        }
-        return true;
-    }
-    
-    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            mRenderer.mScaleFactor *= Math.pow(detector.getScaleFactor(),0.5f);
-            
-            // Don't let the object get too small or too large.
-            mRenderer.mScaleFactor = Math.max(0.3f, Math.min(mRenderer.mScaleFactor, 1.3f));
-
-            requestRender();
-            return true;
-        }
-    }
-
-    /**
-     * Render a cube.
-     */
-    private class CubeRenderer implements GLSurfaceView.Renderer {
-        private Scene mScene;
-        public float mAngleX;
-        public float mAngleY; 
-        
-        public float mScaleFactor = 1.f;
-        
-        public CubeRenderer() {
-            mScene = new Scene(mFloorsCount, mCarsCount);
-        }
-
-        public void onDrawFrame(GL10 gl) {
-            /*
-             * Usually, the first thing one might want to do is to clear
-             * the screen. The most efficient way of doing this is to use
-             * glClear().
-             */
-
-            gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
-
-            /*
-             * Now we're ready to draw some 3D objects
-             */
-
-            gl.glMatrixMode(GL10.GL_MODELVIEW);
-            gl.glLoadIdentity();
-            gl.glTranslatef(0, 0, -3.0f);
-            
-            gl.glRotatef(mAngleY, 1, 0, 0);
-            gl.glRotatef(mAngleX, 0, 1, 0);
-            
-            gl.glScalef(mScaleFactor, mScaleFactor, mScaleFactor);
-            
-            gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-            gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-
-            mScene.draw(gl);
-        }
-
-        public void onSurfaceChanged(GL10 gl, int width, int height) {
-             gl.glViewport(0, 0, width, height);
-             /*
-              * Set our projection matrix. This doesn't have to be done
-              * each time we draw, but usually a new projection needs to
-              * be set when the viewport is resized.
-              */
-             float ratio = (float) width / height;
-             gl.glMatrixMode(GL10.GL_PROJECTION);
-             gl.glLoadIdentity();
-             gl.glFrustumf(-ratio, ratio, -1, 1, 1, 10);
-        }
-
-        public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-            /*
-             * By default, OpenGL enables features that improve quality
-             * but reduce performance. One might want to tweak that
-             * especially on software renderer.
-             */
-            gl.glDisable(GL10.GL_DITHER);
-            /*
-             * Some one-time OpenGL initialization can be made here
-             * probably based on features of this particular context
-             */
-			gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_FASTEST);
+public class TouchRotateActivity extends RendererActivity {
+	@Override
+	public void initScene() {
+		Intent intent = getIntent();
+		int floors = intent.getIntExtra("floors", 1);
+		int cars = intent.getIntExtra("cars", 1);
+		
+		scene.lights().add(new Light());
+		IParser parser = Parser.createParser(Parser.Type.OBJ,
+				getResources(), "com.parking.model:raw/camaro_obj", true);
+		parser.parse();
+		
+		Object3dContainer carModel = parser.getParsedObject();
+		carModel.scale().x = carModel.scale().y = carModel.scale().z = 0.07f;
+		carModel.position().y = -(floors-1)*0.5f/2;
+		carModel.rotation().x = -90;
+		carModel.position().y += 0.05f;
+		
+		float carPlaceW = 0.16f;
+		
+		for (int i=0; i<floors; i++) {
+			Object3dContainer floorModel = new Floor((cars+6)*carPlaceW/3f, 0.1f, 2.1f);
+			floorModel.position().y = -(floors-1)*0.5f/2+i*0.5f;
+			floorModel.colorMaterialEnabled(true);
+			floorModel.lightingEnabled(false);
+			scene.addChild(floorModel);
 			
-			gl.glClearColor(1,1,1,1);
-			gl.glEnable(GL10.GL_CULL_FACE);
-			gl.glShadeModel(GL10.GL_SMOOTH);
-			gl.glEnable(GL10.GL_DEPTH_TEST);
-        }
+			if (i < (floors-1)) {
+				Object3dContainer floorsLiftRight = new Lift(1.2f, 0.5f, 0.1f);
+				floorsLiftRight.position().x += (cars+6)*carPlaceW/6f;
+				floorsLiftRight.position().y = -(floors-1)*0.5f/2+i*0.5f;
+				floorsLiftRight.colorMaterialEnabled(true);
+				floorsLiftRight.lightingEnabled(false);
+				
+				Object3dContainer floorsLiftLeft = new Lift(1.2f, 0.5f, 0.1f);
+				floorsLiftLeft.position().x -= (cars+6)*carPlaceW/6f;
+				floorsLiftLeft.position().y = -(floors-1)*0.5f/2+i*0.5f;
+				floorsLiftLeft.rotation().y += 180f;
+				floorsLiftLeft.colorMaterialEnabled(true);
+				floorsLiftLeft.lightingEnabled(false);
+				
+				scene.addChild(floorsLiftRight);
+				scene.addChild(floorsLiftLeft);
+			}
+			
+			carModel.position().x = -cars*carPlaceW/6f+carPlaceW/2f;
+			for (int j=0; j<cars/3; j++) {
+				carModel.position().z = -0.8f;
+				scene.addChild(carModel.clone());
+				
+				carModel.position().z = 0f;
+				scene.addChild(carModel.clone());
+				
+				carModel.position().z = 0.8f;
+				scene.addChild(carModel.clone());
+				
+				carModel.position().x += carPlaceW;
+			}
+			carModel.position().y += 0.5f;
+		}
+		
+	}
 
-    }
+	@Override
+	public void updateScene() {
+	}
 }
-
-

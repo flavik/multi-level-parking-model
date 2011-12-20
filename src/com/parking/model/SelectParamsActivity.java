@@ -31,7 +31,7 @@ public class SelectParamsActivity extends Activity {
         mCarsBar = (SeekBar)findViewById(R.id.carsSeek);
         
         mFloorsText.setText(getString(R.string.floorsCnt)+String.valueOf(mFloorsBar.getProgress()+1));
-        mCarsText.setText(getString(R.string.carsCnt)+String.valueOf(mCarsBar.getProgress()+1));
+        mCarsText.setText(getString(R.string.carsCnt)+String.valueOf(3*(mCarsBar.getProgress()+1)));
         
         mFloorsBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			@Override
@@ -50,7 +50,7 @@ public class SelectParamsActivity extends Activity {
         mCarsBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		        mCarsText.setText(getString(R.string.carsCnt)+String.valueOf(progress+1));				
+		        mCarsText.setText(getString(R.string.carsCnt)+String.valueOf(3*(progress+1)));				
 			}
 
 			@Override
@@ -66,7 +66,7 @@ public class SelectParamsActivity extends Activity {
     public void onModeling(View view) {
     	Intent intent = new Intent(this, TouchRotateActivity.class);
     	intent.putExtra("floors", mFloorsBar.getProgress()+1);
-    	intent.putExtra("cars", mCarsBar.getProgress()+1);
+    	intent.putExtra("cars", 3*(mCarsBar.getProgress()+1));
 		startActivity(intent);	
 		return;
     }
